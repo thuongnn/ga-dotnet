@@ -1,0 +1,96 @@
+name: Publish package to the Github Repository
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PROJECT: 'samples-dotnet-helloworld/samples-dotnet-helloworld.csproj'
+  BUILD_CONFIG: 'Release'
+
+jobs:
+  Release:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Set up NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+      with:
+        nuget-version: 4.8
+        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+
+    - name: DryRun Semantic Release
+      uses: cycjimmy/semantic-release-action@v3
+      id: semantic
+      with:
+        dry_run: true
+      
+    - name: Restore Packages
+      if: steps.semantic.outputs.new_release_published == 'true'
+      run: nuget restore
+      # run: msbuild $PROJECT -t:restore,build -p:RestorePackagesConfig=true
+
+    - name: Package
+      if: steps.semantic.outputs.new_release_published == 'true'
+      working-directory: samples-dotnet-helloworld
+      run: ls; nuget pack HelloWorld.nuspec -Version ${{ steps.semantic.outputs.new_release_version }}
+
+    - name: Debug
+      run: ls samples-dotnet-helloworld
+
+    - name: Publish the package to nuget.org
+      if: steps.semantic.outputs.new_release_published == 'true'
+      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+
+    - name: Semantic Release
+      if: steps.semantic.outputs.new_release_published == 'true'
+      uses: cycjimmy/semantic-release-action@v3
+
+# jobs:
+#   publish:
+#     name: build, pack & publish
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         dotnet-version: ['3.0']
+#     env:
+#       OUTPUT_FOLDER: out
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+#         uses: actions/setup-dotnet@v3
+#         with:
+#           dotnet-version: ${{ matrix.dotnet-version }}
+#         # env:
+#         #   NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+#       - name: Install dependencies
+#         working-directory: samples-dotnet-helloworld
+#         run: dotnet restore
+
+#       - name: Build
+#         working-directory: samples-dotnet-helloworld
+#         run: dotnet pack -c Release --no-restore -o $OUTPUT_FOLDER
+
+#       # - name: Restore dependency packages
+#       #   working-directory: samples-dotnet-helloworld
+#       #   run: dotnet restore
+
+#       - name: Debug
+#         working-directory: samples-dotnet-helloworld
+#         run: ls -lah ./out
+
+#       - name: Publish the package to nuget.org
+#         working-directory: samples-dotnet-helloworld
+#         run: dotnet nuget push $OUTPUT_FOLDER/*.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+#         env:
+#           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+      

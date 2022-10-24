@@ -1,0 +1,38 @@
+{
+  "branches": "master",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thuongnn/ga-dotnet.git"
+  },
+  "debug": "false",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Example HelloWorld Application Changelog"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md"
+        ]
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "name": "hello-world.nupkg",
+            "path": "**/*.nupkg"
+          }
+        ]
+      }
+    ]
+  ]
+}
