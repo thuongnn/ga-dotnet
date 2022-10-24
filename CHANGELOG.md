@@ -1,5 +1,12 @@
 # Example HelloWorld Application Changelog
 
+# [1.1.0](https://github.com/thuongnn/ga-dotnet/compare/v1.0.1...v1.1.0) (2022-10-24)
+
+
+### Features
+
+* **sell:** add sell feature ([e2aecb7](https://github.com/thuongnn/ga-dotnet/commit/e2aecb70f300ad4d970ae206f5b34521db7bc5bb))
+
 ## [1.0.1](https://github.com/thuongnn/ga-dotnet/compare/v1.0.0...v1.0.1) (2022-10-24)
 
 
